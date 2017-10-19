@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <style>
+        #shop{
+            width:700px;
+            margin:0 auto;
+        }
+        table{
+            width:100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="shop">
+        <div v-for="(x,index) in productlist">
+            <p>
+                <input type="checkbox" v-model="x.checked" @change="storeall(index)" /> {{x.storename}}
+                <span>店铺总额：<i v-html="storetotal(index)"></i></span>
+            </p>
+            <table>
+                <tr>
+                    <th>选择</th>
+                    <th>商品</th>
+                    <th>单价</th>
+                    <th>数量</th>
+                    <th>操作</th>
+                </tr>
+                <tr v-for="(y,index1) in x.list">
+                    <td><input type="checkbox" v-model="y.checked" @change="check(index,index1)"></td>
+                    <td>{{y.name}}</td>
+                    <td>￥ {{y.price.toFixed(2)}}</td>
+                    <td>
+                        <button>-</button>
+                        <input type="text" v-model="y.num" />
+                        <button>+</button>
+                    </td>
+                    <td><button>删除</button></td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <input type="checkbox" v-model="allchecked" @change="all()" />全选
+            <p>总额：<span v-html="total()"></span></p>
+        </div>
+    </div>
+
+<script src="vue.min.js"></script>
+<script>
+    var productlist = [
+        {
+            storename:"苹果旗舰店",
+            checked:false,
+            list:[
+                {
+                    name:"iphone6",
+                    price:2500,
+                    checked:false,
+                    num:1
+                },
+                {
+                    name:"iphone7",
+                    price:4300,
+                    checked:false,
+                    num:1
+                },
+                {
+                    name:"iphone7plus",
+                    price:6800,
+                    checked:false,
+                    num:1
+                }
+            ]
+        },
+        {
+            storename:"小米旗舰店",
+            checked:false,
+            list:[
+                {
+                    name:"小米MIX2",
+                    price:3300,
+                    checked:false,
+                    num:1
+                },
+                {
+                    name:"小米6",
+                    price:2999,
+                    checked:false,
+                    num:1
+                },
+                {
+                    name:"小米扫地机器人",
+                    price:1699,
+                    checked:false,
+                    num:1
+                },
+                {
+                    name:"小米AI音响",
+                    price:299,
+                    checked:false,
+                    num:1
+                }
+            ]
+        },
+        {
+            storename:"华为旗舰店",
+            checked:false,
+            list:[
+                {
+                    name:"华为Meta10保时捷版",
+                    price:10000,
+                    checked:false,
+                    num:1
+                },
+                {
+                    name:"华为Meta9",
+                    price:3999,
+                    checked:false,
+                    num:1
+                },
+                {
+                    name:"华为荣耀Magic",
+                    price:2999,
+                    checked:false,
+                    num:1
+                }
+            ]
+        }
+    ]
+    var vm = new Vue({
+        el:"#shop",
+        data:{
+            productlist:productlist,
+            allchecked:false
+        },
+        methods:{
+            //商品全选
+            all:function(){
+                var flag = false;
+                if(this.allchecked){
+                    flag = true;
+                }
+                for(var i=0;i<this.productlist.length;i++){
+                    this.productlist[i].checked = flag;
+                    for(var j=0;j<this.productlist[i].list.length;j++){
+                        this.productlist[i].list[j].checked = flag;
+                    }
+                }
+            },
+            //店铺全选
+            storeall:function(index){
+                var list = this.productlist[index].list;
+                if(this.productlist[index].checked){
+                    for(var i=0;i<list.length;i++){
+                        list[i].checked = true;
+                    }
+                }else{
+                    for(var i=0;i<list.length;i++){
+                        list[i].checked = false;
+                    }
+                }
+                this.isall();
+            },
+            //单选
+            check:function(index,index1){
+                var flag = true;
+                var list = this.productlist[index].list;
+                for(var i=0;i<list.length;i++){
+                    if(!list[i].checked){
+                        flag = false;
+                        break;
+                    }
+                }
+                flag==true?this.productlist[index].checked=true:this.productlist[index].checked=false;
+                // if(flag){
+                //     this.productlist[index].checked=true
+                // }else{
+                //     this.productlist[index].checked=false;
+                // }
+                this.isall();
+            },
+            //判断全选
+            isall:function(){
+                var flag1 = true;
+                for(var i=0;i<this.productlist.length;i++){
+                    if(!this.productlist[i].checked){
+                        flag1 = false;
+                        break;
+                    }
+                }
+                flag1==true?this.allchecked=true:this.allchecked=false;
+            },
+            //计算店铺总额
+            storetotal:function(index){
+                var storemoney = 0;
+                var list = this.productlist[index].list;
+                for(var i=0;i<list.length;i++){
+                    if(list[i].checked){
+                        storemoney += list[i].price * list[i].num;
+                    }
+                }
+                return "￥" + storemoney.toFixed(2);
+            },
+            //总额
+            total:function(){
+                var money = 0;
+                for(var i=0;i<this.productlist.length;i++){
+                    for(var j=0;j<this.productlist[i].list.length;j++){
+                        if(this.productlist[i].list[j].checked){
+                            money += this.productlist[i].list[j].price * this.productlist[i].list[j].num;
+                        }
+                    }
+                }
+                return "￥" + money.toFixed(2);
+            }
+        }
+    })
+</script>
+</body>
+</html>
